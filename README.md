@@ -1,98 +1,117 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Car Parking System.
+A RESTful API  implement for a car parking system.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Data Models
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- ParkingSpace
+  - spot_no: number
+  - is_reserved: boolean
+  - registration_no: string | null
+- Vehicle
+  - registration_no: string
+  - color: string
+- Booking (Implicit)
+  - registration_no: string
+### Relationships and Embedding
 
-## Description
+- ParkingLot
+  - embeds ParkingSpaces
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
+## Notes
+-Implemented in NestJS with TypeScript.
+-Uses arrays and maps to store related information. 
+## APIs
 
-## Project setup
+- `POST /parking/parking_lots/init`     - Initialize the Parking Lot System
+- `PATCH /parking/parking_lots/expand`   - Expand the capacity of existing Parking Lot System
+- `POST /parking/parking_spaces/park`   - Park a Vehicle
+- `POST /parking/parking_spaces/leave`  - Unpark a Vehicle
+- `GET /parking/parking_spaces/status` - Get Parking Space Status
+- `GET /parking/parking_spaces/registration_numbers/:color` - Get All Registered Vehicles with a Specific Color
+- `GET /parking/parking_spaces/slots/:color`               - Get All Parking Slots with a Specific Color
+- `GET /parking/parking_spaces/slot?registrationNumber={registrationNumber}` - Get Parking Slot for a Specific Vehicle Registration
+- `PUT /parking/parking_spaces/:slotNumber` - Update Parking Slot Information
+- `DELETE /parking/parking_spaces/:slotNumber` - Delete a Parking Slot from System
 
-```bash
-$ npm install
+---
+## Assumptions
+
+- The parking lot is initialized before any other operations.
+- Slot numbers increase as the distance from the entry point increases.
+- The system allocates the nearest available slot to a car.
+- A car can only be parked if there is an available slot.
+- When unparking a car by registration number, the first matching slot is cleared.
+
+## Features
+
+- RESTful API design.
+- Uses NestJS and TypeScript for a scalable and maintainable architecture.
+- In-memory data storage using arrays and maps.
+- Implements all required functionalities: initialization, expansion, allocation, deallocation, and status retrieval.
+- Includes error handling for various scenarios (e.g., parking lot full, invalid input).
+- Implements Unit Tests with Jest
+- Implements README markdown file
+
+## Installation
+
+```
+# Using npm
+npm install
 ```
 
-## Compile and run the project
+## Running
 
-```bash
-# development
-$ npm run start
+```
+# For Local Development
+npm run start:dev
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# On Production
+npm run start
 ```
 
-## Run tests
+## Functionality Testing
 
-```bash
-# unit tests
-$ npm run test
+```
+# Initialize the Parking Lot System
+curl -X POST -H "Content-Type: application/json" -d '{"no_of_slot": 6}' http://localhost:3000/parking/parking_lots/init
 
-# e2e tests
-$ npm run test:e2e
+# Expand Parking Lot System
+curl -X PATCH -H "Content-Type: application/json" -d '{"increment_slot": 3}' http://localhost:3000/parking/parking_lots/expand
 
-# test coverage
-$ npm run test:cov
+# Park a Vehicle
+curl -X POST -H "Content-Type: application/json" -d '{"registrationNumber": "KA-01-AB-2211", "color": "white"}' http://localhost:3000/parking/parking_spaces/park
+
+# Unpark a Vehicle (by slot number)
+curl -X POST -H "Content-Type: application/json" -d '{"slot_number": 1}' http://localhost:3000/parking/parking_spaces/leave
+
+# Unpark a Vehicle (by registration number)
+curl -X POST -H "Content-Type: application/json" -d '{"car_registration_no": "KA-01-AB-2211"}' http://localhost:3000/parking/parking_spaces/leave
+
+# Get Parking Space Status
+curl http://localhost:3000/parking/parking_spaces/status
+
+# Get All Registered Vehicles with a Specific Color
+curl http://localhost:3000/parking/parking_spaces/registration_numbers/white
+
+# Get All Parking Slots with a Specific Color
+curl http://localhost:3000/parking/parking_spaces/slots/white
+
+# Get Parking Slot for a Specific Vehicle Registration
+curl http://localhost:3000/parking/parking_spaces/slot?registrationNumber=KA-01-AB-2211
+
+# Update Parking Slot Information
+curl -X PUT -H "Content-Type: application/json" -d '{"registrationNumber": "KA-01-CD-5678", "color": "black"}' http://localhost:3000/parking/parking_spaces/1
+
+# Delete a Parking Slot from System
+curl -X DELETE http://localhost:3000/parking/parking_spaces/1
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
+### Development Notes
 ```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+* Implemented all the steps in the problem statement
+* Implemented unit tests with Jest
+* Used TypeScript
+* Implemented error handling
+* Refactored and reviewed code multiple times.
+```
