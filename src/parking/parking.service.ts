@@ -75,29 +75,6 @@ export class ParkingService {
 
     return { freed_slot_number: slot.slotNumber };
   }
-
-//   getRegistrationNumbersByColor(color: string): string[] {
-//     return this.parkingSlots
-//       .filter((slot) => slot.isOccupied && slot.car?.color === color)
-//       .map((slot) => slot.car.registrationNumber);
-//   }
-
-//   getSlotNumbersByColor(color: string): number[] {
-//     return this.parkingSlots
-//       .filter((slot) => slot.isOccupied && slot.car?.color === color)
-//       .map((slot) => slot.slotNumber);
-//   }
-
-//   getOccupiedSlots(): any[] {
-//     return this.parkingSlots
-//       .filter((slot) => slot.isOccupied)
-//       .map((slot) => ({
-//         slot_no: slot.slotNumber,
-//         registration_no: slot.car.registrationNumber,
-//         color: slot.car.color,
-//       }));
-//   }
-// }
 getRegistrationNumbersByColor(color: string): string[] {
     return this.parkingSlots
       .filter((slot) => slot.isOccupied && slot.car?.color === color)
